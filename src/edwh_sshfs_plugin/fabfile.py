@@ -50,8 +50,8 @@ def remote_mount(c, workstation_dir, server_dir):
     port = get_available_port(c)
     ssh_cmd = ssh["-A", f"-R {port}:127.0.0.1:22", f"{c.user}@{c.host}"]
     sshfs_cmd = ssh_cmd["sshfs", f"-p {port}", "-o default_permissions",
-                        "-o StrictHostKeyChecking=no", f"{getpass.getuser()}@127.0.0.1:{workstation_dir}",
-                        f"{server_dir}"]
+                        "-o StrictHostKeyChecking=no", "-oauto_cache,reconnect",
+                        f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
 
     print(f"running: {str(sshfs_cmd)}")
     print(sshfs_cmd())
