@@ -1,6 +1,7 @@
 import socket
 import getpass
 import os
+import subprocess
 from plumbum.cmd import ssh, sshfs
 from fabric import task
 
@@ -40,6 +41,7 @@ def get_local_available_port(start_port=2222):
     return available_ports
 
 
+@task
 def unmount_dir(c, dir):
     umount_server_dir = f"umount {dir}"
     print(f"running {umount_server_dir}")
@@ -48,6 +50,8 @@ def unmount_dir(c, dir):
         c.run(f"lsof -n {dir} 2>/dev/null")
         pids = c.run("lsof -t -n /home/ubuntu/testing 2>/dev/null", hide=True).stdout.strip().split('\n')
         print(f'Terminate with: kill {" ".join(pids)}; sleep 2; umount {dir}')
+    else:
+        print("successfully exited :)")
 
 
 @task()
@@ -72,6 +76,7 @@ def remote_mount(c, workstation_dir, server_dir):
 
 @task()
 def local_mount(c, workstation_dir, server_dir):
+    os.popen(f"lsof -n {workstation_dir} 2>/dev/null")
     if not hasattr(c, "host"):
         print("please give up a host using -H")
         exit(255)
@@ -80,7 +85,4 @@ def local_mount(c, workstation_dir, server_dir):
 
     print("starting sshfs with(started when nothing happens):", sshfs_cmd)
 
-    try:
-        sshfs_cmd()
-    except KeyboardInterrupt:
-        unmount_dir(c, workstation_dir)
+    sshfs_cmd()
