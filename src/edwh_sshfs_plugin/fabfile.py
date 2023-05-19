@@ -40,6 +40,16 @@ def get_local_available_port(start_port=2222):
     return available_ports
 
 
+def unmount_dir(c, dir):
+    umount_server_dir = f"umount {dir}"
+    print(f"running {umount_server_dir}")
+    if not c.run(umount_server_dir, warn=True).ok:
+        print("cannot unmount because following processes are still running and using the mount")
+        c.run(f"lsof -n {dir} 2>/dev/null")
+        pids = c.run("lsof -t -n /home/ubuntu/testing 2>/dev/null", hide=True).stdout.strip().split('\n')
+        print(f'Terminate with: kill {" ".join(pids)}; sleep 2; umount {dir}')
+
+
 @task()
 def remote_mount(c, workstation_dir, server_dir):
     if not hasattr(c, "host"):
@@ -57,13 +67,7 @@ def remote_mount(c, workstation_dir, server_dir):
     try:
         sshfs_cmd()
     except KeyboardInterrupt:
-        umount_server_dir = f"umount {server_dir}"
-        print(f"running {umount_server_dir}")
-        if not c.run(umount_server_dir, warn=True).ok:
-            print("cannot unmount because following processes are still running and using the mount")
-            c.run(f"lsof -n {server_dir} 2>/dev/null")
-            pids = c.run("lsof -t -n /home/ubuntu/testing 2>/dev/null", hide=True).stdout.strip().split('\n')
-            print(f'Terminate with: kill {" ".join(pids)}; sleep 2; umount {server_dir}')
+        unmount_dir(c, server_dir)
 
 
 @task()
@@ -76,7 +80,7 @@ def local_mount(c, workstation_dir, server_dir):
 
     print("starting sshfs with(started when nothing happens):", sshfs_cmd)
 
-    sshfs_cmd()
-
-# process = subprocess.Popen(f"sshfs -v -p {available_port} -o default_permissions {c.user}@127.0.0.1:{workstation_dir} {server_dir}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-# subprocess.Popen(f"ssh -A -R {available_port}:127.0.0.1:22 {c.user}@{c.host}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        sshfs_cmd()
+    except KeyboardInterrupt:
+        unmount_dir(c, workstation_dir)
