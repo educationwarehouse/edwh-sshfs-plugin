@@ -66,7 +66,7 @@ def remote_mount(c, workstation_dir, server_dir):
     sshfs_cmd = ssh_cmd["sshfs", "-f", f"-p {port}", "-o default_permissions",
                         "-o StrictHostKeyChecking=no,reconnect,ServerAliveInterval=3,ServerAliveCountMax=3",
                         f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
-
+    # hi
     print(f"starting sshfs with(started when nothing happens): {str(sshfs_cmd)}")
     try:
         sshfs_cmd()
