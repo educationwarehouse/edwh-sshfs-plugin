@@ -37,6 +37,7 @@ sudo apt install openssh-server
 sudo systemctl enable ssh
 sudo apt install sshfs
 sudo ufw allow ssh
+sudo init 6 #optional for reboot
 ```
 
 ## creating remote mounts
