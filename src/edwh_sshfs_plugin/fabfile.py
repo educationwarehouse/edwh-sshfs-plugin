@@ -77,7 +77,7 @@ def get_local_available_port(start_port=2222):
     return available_ports
 
 
-@task(help={'dir' "The directory path to be unmounted."})
+@task(help={'dir': "The directory path to be unmounted."})
 def unmount_dir(c, dir):
     """
         Unmounts a directory on the server.
@@ -142,7 +142,7 @@ async def local_mount(c, workstation_dir, server_dir, queue=None):
         Returns:
             None
         """
-    os.popen(f"lsof -n {workstation_dir} 2>/dev/null")
+    # os.popen(f"lsof -n {workstation_dir} 2>/dev/null")
     if not hasattr(c, "host"):
         print("please give up a host using -H")
         exit(255)
