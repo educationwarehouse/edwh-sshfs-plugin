@@ -1,13 +1,9 @@
 import asyncio
 import socket
 import getpass
-import os
-import subprocess
-
 import invoke
 from plumbum import BG
 from plumbum.cmd import ssh, sshfs
-from plumbum.commands.processes import run_proc
 from fabric import task
 
 

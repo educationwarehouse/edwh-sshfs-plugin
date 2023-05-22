@@ -14,7 +14,7 @@
 
 ## Installation
 
-```console
+```shell
 pip install edwh-sshfs-plugin
 ```
 
@@ -26,6 +26,16 @@ pipx install edwh[sshfs]
 or
 ```shell
 pipx install edwh[plugins,omgeving]
+```
+
+Also you will be required to run these commands
+```shell
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install openssh-client
+sudo apt install openssh-server
+sudo systemctl enable ssh
+sudo ufw allow ssh
 ```
 
 ## creating remote mounts
