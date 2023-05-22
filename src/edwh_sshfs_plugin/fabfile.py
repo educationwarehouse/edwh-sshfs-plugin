@@ -1,10 +1,17 @@
+import asyncio
 import socket
 import getpass
 import os
 import subprocess
+
+import invoke
+from plumbum import BG
 from plumbum.cmd import ssh, sshfs
+from plumbum.commands.processes import run_proc
 from fabric import task
 
+
+STOP_RUNNING = False
 
 def get_available_port(c):
     # get remote available ports
@@ -55,7 +62,7 @@ def unmount_dir(c, dir):
 
 
 @task()
-def remote_mount(c, workstation_dir, server_dir):
+async def remote_mount(c, workstation_dir, server_dir, queue=None):
     if not hasattr(c, "host"):
         print("please give up a host using -H")
         exit(255)
@@ -67,15 +74,18 @@ def remote_mount(c, workstation_dir, server_dir):
                         "-o StrictHostKeyChecking=no,reconnect,ServerAliveInterval=3,ServerAliveCountMax=3",
                         f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
 
-    print(f"starting sshfs with(started when nothing happens): {str(sshfs_cmd)}")
+    if not queue:
+        print(f"starting sshfs with(started when nothing happens): {str(sshfs_cmd)}")
     try:
-        sshfs_cmd()
+        sshfs_cmd & BG
+        await queue.get()
+        c.run(f"pkill -kill -f \"sshfs\" && umount {server_dir}")
     except KeyboardInterrupt:
         unmount_dir(c, server_dir)
 
 
 @task()
-def local_mount(c, workstation_dir, server_dir):
+async def local_mount(c, workstation_dir, server_dir, queue=None):
     os.popen(f"lsof -n {workstation_dir} 2>/dev/null")
     if not hasattr(c, "host"):
         print("please give up a host using -H")
@@ -83,6 +93,11 @@ def local_mount(c, workstation_dir, server_dir):
     # TODO: remove mount on exit
     sshfs_cmd = sshfs["-f", "-o", "default_permissions,StrictHostKeyChecking=no,reconnect", f"{c.user}@{c.host}:{server_dir}", workstation_dir]
 
-    print("starting sshfs with(started when nothing happens):", sshfs_cmd)
+    if not queue:
+        print("running sshfs...")
 
-    sshfs_cmd()
+    sshfs_cmd & BG
+    await queue.get()
+
+    local_connection = invoke.context.Context()
+    local_connection.run(f"umount {workstation_dir}", hide=True)

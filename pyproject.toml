@@ -23,7 +23,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ['invoke', 'fabric', 'psutil']
+dependencies = ['invoke', 'fabric', 'psutil', "plumbum>=1.8.1"]
 
 [project.optional-dependencies]
 dev = [
@@ -60,6 +60,12 @@ parser_angular_patch_types = "fix,perf,refactor,build,chore,patch"
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "pytest_asyncio",
+  "invoke",
+  "fabric",
+  "decorator",
+  "psutil",
+  "plumbum>=1.8.1"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -82,7 +88,7 @@ dependencies = [
   "black>=23.1.0",
   "mypy>=1.0.0",
   "ruff>=0.0.243",
-  "plumbum>=1.8.1"
+  "plumbum>=1.8.1",
 ]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src/edwh_sshfs_plugin tests}"
