@@ -24,11 +24,38 @@ pip install edwh-demo-plugin
 
 But probably you want to install the whole edwh package:
 
-```console
+```shell
 pipx install edwh[demo]
-# or
+```
+or
+```shell
 pipx install edwh[plugins,omgeving]
 ```
+
+## creating remote mounts
+**usage**
+```shell
+edwh -h {server} sshfs.remote-mount -w {local_dir} -s {server_dir}
+```
+The remote_mount function is an asynchronous Python task that allows you to mount a remote directory 
+on your local machine using SSHFS (SSH Filesystem). It establishes a secure connection to a remote server, 
+forwards a port, and mounts the remote directory on the local machine.
+
+**Parameters**
+- `workstation_dir`: The local directory path where the remote directory will be mounted to the server_dir.
+- `server_dir`: The remote directory path that will become a mount
+- `queue`: An optional parameter representing the queue object for synchronization (default: None).
+
+## creating local mounts
+**Usage**
+```shell
+edwh -h {server} sshfs.local-mount -w {local_dir} -s {server_dir}
+```
+
+**Arguments**
+- `workstation_dir(-w)`: The local directory path That will become a mount
+- `server_dir(-s)`: The remote directory path That will be mounted onto the workstation directory
+- `queue`: An optional parameter representing the queue object for synchronization (default: None).
 
 ## License
 
