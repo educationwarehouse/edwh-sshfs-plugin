@@ -35,6 +35,7 @@ sudo apt-get upgrade
 sudo apt-get install openssh-client
 sudo apt install openssh-server
 sudo systemctl enable ssh
+sudo apt install sshfs
 sudo ufw allow ssh
 ```
 
