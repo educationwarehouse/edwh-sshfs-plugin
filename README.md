@@ -8,6 +8,8 @@
 **Table of Contents**
 
 - [Installation](#installation)
+- [Local Mounts](#creating-local-mounts)
+- [Remote Mounts](#creating-remote-mounts)
 - [License](#license)
 
 ## Installation
