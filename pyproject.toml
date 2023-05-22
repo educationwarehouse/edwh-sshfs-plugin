@@ -62,6 +62,7 @@ dependencies = [
   "pytest",
   "pytest_asyncio",
   "invoke",
+  "sshfs",
   "fabric",
   "decorator",
   "psutil",
