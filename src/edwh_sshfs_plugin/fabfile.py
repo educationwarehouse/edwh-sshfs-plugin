@@ -130,9 +130,9 @@ async def remote_mount(c, workstation_dir, server_dir, queue=None):
         unmount_dir(c, server_dir)
 
 
-@task(help={'workstation-dir' 'The directory path on the local machine to be mounted.',
-            'server-dir' 'The directory path on the remote server to mount the workstation directory.',
-            'queue' 'An optional queue object used for synchronization. Defaults to None, optional'})
+@task(help={'workstation-dir': 'The directory path on the local machine to be mounted.',
+            'server-dir': 'The directory path on the remote server to mount the workstation directory.',
+            'queue': 'An optional queue object used for synchronization. Defaults to None, optional'})
 async def local_mount(c, workstation_dir, server_dir, queue=None):
     """
         The local_mount function is a Python task that enables the mounting of a remote directory on a local workstation
