@@ -112,7 +112,7 @@ def remote_mount(c, workstation_dir, server_dir, queue=None):
     # get an available port that is usable on local and remote so we can setup a connection with the ports
     port = get_available_port(c)
     ssh_cmd = ssh["-A", f"-R {port}:127.0.0.1:22", f"{c.user}@{c.host}"]
-    sshfs_cmd = ssh_cmd["sshfs", "-f", f"-p {port}", "-o -o allow_other,default_permissions",
+    sshfs_cmd = ssh_cmd["sshfs", "-f", f"-p {port}", "-o allow_other,default_permissions",
                         "-o StrictHostKeyChecking=no,reconnect,ServerAliveInterval=3,ServerAliveCountMax=3",
                         f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
 
@@ -141,7 +141,7 @@ def local_mount(c, workstation_dir, server_dir, queue=None):
         print("please give up a host using -H")
         exit(255)
     # TODO: remove mount on exit
-    sshfs_cmd = sshfs["-f", "-o", "-o allow_other,default_permissions,StrictHostKeyChecking=no,reconnect", f"{c.user}@{c.host}:{server_dir}", workstation_dir]
+    sshfs_cmd = sshfs["-f", "-o", "allow_other,default_permissions,StrictHostKeyChecking=no,reconnect", f"{c.user}@{c.host}:{server_dir}", workstation_dir]
 
     if not queue:
         print("running sshfs...")
