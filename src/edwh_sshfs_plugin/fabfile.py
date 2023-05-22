@@ -100,7 +100,7 @@ def unmount_dir(c, dir):
 @task(help={'workstation-dir' : "The directory path on the local machine to mount the server directory.",
             'server-dir' : "The directory path on the remote server to be mounted.",
             'queue' : "An optional queue object used for synchronization. Defaults to None, optional"})
-async def remote_mount(c, workstation_dir, server_dir, queue=None):
+def remote_mount(c, workstation_dir, server_dir, queue=None):
     """
     The remote_mount function is an asynchronous Python task that allows you to mount a remote directory
     on your local machine using SSHFS (SSH Filesystem). It establishes a secure connection to a remote server,
@@ -123,9 +123,7 @@ async def remote_mount(c, workstation_dir, server_dir, queue=None):
     if not queue:
         print(f"starting sshfs with(started when nothing happens): {str(sshfs_cmd)}")
     try:
-        sshfs_cmd & BG
-        await queue.get()
-        c.run(f"pkill -kill -f \"sshfs\" && umount {server_dir}")
+        sshfs_cmd()
     except KeyboardInterrupt:
         unmount_dir(c, server_dir)
 
@@ -133,7 +131,7 @@ async def remote_mount(c, workstation_dir, server_dir, queue=None):
 @task(help={'workstation-dir': 'The directory path on the local machine to be mounted.',
             'server-dir': 'The directory path on the remote server to mount the workstation directory.',
             'queue': 'An optional queue object used for synchronization. Defaults to None, optional'})
-async def local_mount(c, workstation_dir, server_dir, queue=None):
+def local_mount(c, workstation_dir, server_dir, queue=None):
     """
         The local_mount function is a Python task that enables the mounting of a remote directory on a local workstation
         using SSHFS (SSH Filesystem). It establishes a secure connection to a remote server and mounts a specified
@@ -152,8 +150,56 @@ async def local_mount(c, workstation_dir, server_dir, queue=None):
     if not queue:
         print("running sshfs...")
 
+    sshfs_cmd()
+
+    local_connection = invoke.context.Context()
+    local_connection.run(f"umount {workstation_dir}", hide=True)
+
+#----------------------------------#
+#|             async              |#
+#----------------------------------#
+
+async def async_local_mount(c, workstation_dir, server_dir, queue=None):
+    """
+    async version of local_mount
+    """
+    if not hasattr(c, "host"):
+        print("please give up a host using -H")
+        exit(255)
+
+    sshfs_cmd = sshfs["-f", "-o", "default_permissions,StrictHostKeyChecking=no,reconnect", f"{c.user}@{c.host}:{server_dir}", workstation_dir]
+
+    if not queue:
+        print("running sshfs...")
+
     sshfs_cmd & BG
     await queue.get()
 
     local_connection = invoke.context.Context()
     local_connection.run(f"umount {workstation_dir}", hide=True)
+
+    await asyncio.sleep(1)
+
+async def async_remote_mount(c, workstation_dir, server_dir, queue=None):
+    """
+    async version of remote_mount
+    """
+    if not hasattr(c, "host"):
+        print("please give up a host using -H")
+        exit(255)
+
+    # get an available port that is usable on local and remote so we can setup a connection with the ports
+    port = get_available_port(c)
+    ssh_cmd = ssh["-A", f"-R {port}:127.0.0.1:22", f"{c.user}@{c.host}"]
+    sshfs_cmd = ssh_cmd["sshfs", "-f", f"-p {port}", "-o default_permissions",
+    "-o StrictHostKeyChecking=no,reconnect,ServerAliveInterval=3,ServerAliveCountMax=3",
+    f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
+
+    if not queue:
+        print(f"starting sshfs with(started when nothing happens): {str(sshfs_cmd)}")
+    try:
+        sshfs_cmd & BG
+        await queue.get()
+        c.run(f"pkill -kill -f \"sshfs\" && umount {server_dir}")
+    except KeyboardInterrupt:
+        unmount_dir(c, server_dir)

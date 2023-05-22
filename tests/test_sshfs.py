@@ -61,7 +61,7 @@ async def test_remote_mount(host):
     shared_queue = asyncio.Queue()
 
     create_mount_task = asyncio.create_task(
-        fabfile.remote_mount(
+        fabfile.async_remote_mount(
             create_mount_conn, f"{os.getcwd()}/tests/sshfs_test_dir", "test_sshfs_dir", shared_queue
         )
     )
@@ -108,7 +108,7 @@ async def test_local_mount(host):
     shared_queue = asyncio.Queue()
 
     create_mount_task = asyncio.create_task(
-        fabfile.local_mount(
+        fabfile.async_local_mount(
             create_mount_conn, f"{os.getcwd()}/tests/sshfs_test_dir", "test_sshfs_dir", shared_queue
         )
     )
