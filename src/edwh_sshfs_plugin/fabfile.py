@@ -151,7 +151,7 @@ def local_mount(c, workstation_dir, server_dir, queue=None):
         print("please give up a host using -H")
         exit(255)
     # TODO: remove mount on exit
-    sshfs_cmd = sshfs[  "-f", "-o", "allow_root,default_permissions,umask=002,StrictHostKeyChecking=no,reconnect," \
+    sshfs_cmd = sshfs[  "-f", "-o", "allow_root,default_permissions,umask=000,StrictHostKeyChecking=no,reconnect," \
                         f"uid={getuid()},gid={getgid()}",
                         f"{c.user}@{c.host}:{server_dir}", workstation_dir]
 
@@ -175,7 +175,7 @@ async def async_local_mount(c, workstation_dir, server_dir, event=None):
         print("please give up a host using -H")
         exit(255)
 
-    sshfs_cmd = sshfs["-f", "-o", "allow_root,default_permissions,umask=002,StrictHostKeyChecking=no,reconnect," \
+    sshfs_cmd = sshfs["-f", "-o", "allow_root,default_permissions,umask=000,StrictHostKeyChecking=no,reconnect," \
                         f"uid={getuid()},gid={getgid()}",
     f"{c.user}@{c.host}:{server_dir}", workstation_dir]
 
