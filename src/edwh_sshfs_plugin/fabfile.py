@@ -5,7 +5,7 @@ import invoke
 from plumbum import BG
 from plumbum.cmd import ssh, sshfs
 from fabric import task
-
+import anyio
 
 STOP_RUNNING = False
 
@@ -155,7 +155,7 @@ def local_mount(c, workstation_dir, server_dir, queue=None):
 #|             async              |#
 #----------------------------------#
 
-async def async_local_mount(c, workstation_dir, server_dir, queue=None):
+async def async_local_mount(c, workstation_dir, server_dir, event=None):
     """
     async version of local_mount
     """
@@ -165,18 +165,20 @@ async def async_local_mount(c, workstation_dir, server_dir, queue=None):
 
     sshfs_cmd = sshfs["-f", "-o", "default_permissions,StrictHostKeyChecking=no,reconnect", f"{c.user}@{c.host}:{server_dir}", workstation_dir]
 
-    if not queue:
+    if not event:
         print("running sshfs...")
 
-    sshfs_cmd & BG
-    await queue.get()
+    process = sshfs_cmd & BG
+    await event.wait()
+
+    process.proc.terminate()
 
     local_connection = invoke.context.Context()
-    local_connection.run(f"umount {workstation_dir}", hide=True)
+    local_connection.run(f"umount {workstation_dir}", warn=True, hide=True)
 
-    await asyncio.sleep(1)
+    await anyio.sleep(1)
 
-async def async_remote_mount(c, workstation_dir, server_dir, queue=None):
+async def async_remote_mount(c, workstation_dir, server_dir, event=None):
     """
     async version of remote_mount
     """
@@ -191,11 +193,13 @@ async def async_remote_mount(c, workstation_dir, server_dir, queue=None):
     "-o StrictHostKeyChecking=no,reconnect,ServerAliveInterval=3,ServerAliveCountMax=3",
     f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
 
-    if not queue:
+    if not event:
         print(f"starting sshfs with(started when nothing happens): {str(sshfs_cmd)}")
     try:
-        sshfs_cmd & BG
-        await queue.get()
-        c.run(f"pkill -kill -f \"sshfs\" && umount {server_dir}")
+        process = sshfs_cmd & BG
+        await event.wait()
+        process.proc.terminate()
+        await anyio.sleep(1)
+        c.run(f"umount {server_dir}", warn=True, hide=True)
     except KeyboardInterrupt:
         unmount_dir(c, server_dir)

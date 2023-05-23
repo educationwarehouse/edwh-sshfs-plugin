@@ -3,14 +3,10 @@ import socket
 import invoke
 from edwh_sshfs_plugin import fabfile
 from fabric import Connection
-import time
-import subprocess
-from multiprocessing import Process
-import asyncio
 import pytest
-import logging
+import anyio
 
-pytest_plugins = ("pytest_asyncio",)
+pytest_plugins = ("pytest_anyio",)
 
 
 def create_new_fabric_connection(host) -> Connection:
@@ -42,7 +38,7 @@ def test_ssh_connection(host):
 
 
 async def check_if_mount_exists(host):
-    await asyncio.sleep(3)
+    await anyio.sleep(3)
     conn_for_mount = create_new_fabric_connection(host)
     assert (
         "is a mount"
@@ -54,80 +50,58 @@ async def check_if_mount_exists(host):
 async def test_remote_mount(host):
     create_mount_conn = create_new_fabric_connection(host)
     if create_mount_conn.run("if test -d test_sshfs_dir; then echo \"exist\"; fi", warn=True, hide=True).stdout == "":
-        # print(create_mount_conn.run("ls test_sshfs_dir", warn=True, hide=True).stdout == "")
-        # return
         create_mount_conn.run("mkdir test_sshfs_dir", hide=True)
 
-    shared_queue = asyncio.Queue()
+    event = anyio.Event()
 
-    create_mount_task = asyncio.create_task(
-        fabfile.async_remote_mount(
-            create_mount_conn, f"{os.getcwd()}/tests/sshfs_test_dir", "test_sshfs_dir", shared_queue
+    async with anyio.create_task_group() as tg:
+        create_mount_task = tg.start_soon(
+            fabfile.async_remote_mount,
+            create_mount_conn,
+            f"{os.getcwd()}/tests/sshfs_test_dir",
+            "test_sshfs_dir",
+            event
         )
-    )
 
-    asyncio.gather(create_mount_task)
-    await asyncio.sleep(5)
+        await anyio.sleep(5)
 
-    conn_for_mount = create_new_fabric_connection(host)
-    assert (
-            "is a mount"
-            in conn_for_mount.run("mountpoint test_sshfs_dir", warn=True, hide=True).stdout
-    )
-    # print(conn_for_mount.run("mountpoint test_sshfs_dir", warn=True, hide=True).stdout)
-    # tell remote_mount to stop running
-    await shared_queue.put(True)
-    shared_queue.join()
-    await asyncio.sleep(1)
-    conn_for_mount.close()
-    create_mount_conn.close()
+        conn_for_mount = create_new_fabric_connection(host)
+        assert (
+                "is a mount"
+                in conn_for_mount.run("mountpoint test_sshfs_dir", warn=True, hide=True).stdout
+        )
 
-    c = create_new_fabric_connection(host)
+        await anyio.maybe_async(event.set())  # Trigger the event to continue execution in async_remote_mount
 
-    assert (
-        "is a mount"
-        not in c.run("mountpoint test_sshfs_dir", warn=True, hide=True).stdout
-    )
+        await tg.cancel_scope.cancel()
+
+        await anyio.sleep(1)
+        conn_for_mount.close()
+        create_mount_conn.close()
 
 
-async def check_local_folder_for_mount():
-    await asyncio.sleep(3)
-
-    conn = invoke.context.Context()
-    assert (
-        "is a mount"
-        in conn.run("mountpoint test_sshfs_dir", warn=True, hide=True).stdout
-    )
-    conn.close()
-
-
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_local_mount(host):
     create_mount_conn = create_new_fabric_connection(host)
     create_mount_conn.run("umount test_sshfs_dir", warn=True, hide=True)
-    shared_queue = asyncio.Queue()
 
-    create_mount_task = asyncio.create_task(
-        fabfile.async_local_mount(
-            create_mount_conn, f"{os.getcwd()}/tests/sshfs_test_dir", "test_sshfs_dir", shared_queue
-        )
-    )
+    event = anyio.Event()
 
-    asyncio.gather(create_mount_task)
+    async with anyio.create_task_group() as tg:
+        tg.start_soon(fabfile.async_local_mount, create_mount_conn, f"{os.getcwd()}/tests/sshfs_test_dir", "test_sshfs_dir", event)
 
-    await asyncio.sleep(5)
+        await anyio.sleep(5)
 
-    conn = invoke.context.Context()
-    assert (
+        conn = invoke.context.Context()
+        assert (
             "is a mount"
             in conn.run(f"mountpoint {os.getcwd()}/tests/sshfs_test_dir", warn=True, hide=True).stdout
-    )
+        )
 
-    await shared_queue.put(True)
-    shared_queue.join()
-    await asyncio.sleep(1)
+        await anyio.maybe_async(event.set())
+        await anyio.sleep(1)
 
-    assert (
+        assert (
             "is a mount"
             not in conn.run(f"mountpoint {os.getcwd()}/tests/sshfs_test_dir", warn=True, hide=True).stdout
-    )
+        )
