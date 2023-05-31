@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.2 (2023-05-31)
+### Fix
+* **import:** Don't crash the entire edwh tool if sshfs is not installed! ([`03b8365`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/03b836576b36d3c814a9678ad0b98fd12a7e246f))
+
 ## v0.1.1 (2023-05-25)
 ### Fix
 * Set umask to highest permission level ([`c8c7362`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/c8c7362b8ea77c0ec62672bdaaa798b388806c89))
