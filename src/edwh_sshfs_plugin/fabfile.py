@@ -1,14 +1,23 @@
-import asyncio
 import os
 import socket
 import getpass
+import warnings
+
 import invoke
 from plumbum import BG
-from plumbum.cmd import ssh, sshfs
+from plumbum.commands.processes import CommandNotFound
 from fabric import task
 import anyio
 
+try:
+    from plumbum.cmd import ssh, sshfs
+except CommandNotFound:
+    warnings.warn("edwh sshfs plugin is installed but sshfs is missing. "
+                  "Please check README.md#installation on how to fix this! "
+                  "The commands in this plugin will NOT work unless this is fixed.")
+
 STOP_RUNNING = False
+
 
 def get_available_port(c):
     """
@@ -102,9 +111,9 @@ def unmount_dir(c, dir):
         print("successfully exited :)")
 
 
-@task(help={'workstation-dir' : "The directory path on the local machine to mount the server directory.",
-            'server-dir' : "The directory path on the remote server to be mounted.",
-            'queue' : "An optional queue object used for synchronization. Defaults to None, optional"})
+@task(help={'workstation-dir': "The directory path on the local machine to mount the server directory.",
+            'server-dir': "The directory path on the remote server to be mounted.",
+            'queue': "An optional queue object used for synchronization. Defaults to None, optional"})
 def remote_mount(c, workstation_dir, server_dir, queue=None):
     """
     The remote_mount function is an asynchronous Python task that allows you to mount a remote directory
@@ -122,9 +131,9 @@ def remote_mount(c, workstation_dir, server_dir, queue=None):
     port = get_available_port(c)
     ssh_cmd = ssh["-A", f"-R {port}:127.0.0.1:22", f"{c.user}@{c.host}"]
     sshfs_cmd = ssh_cmd["sshfs", "-f", f"-p {port}", "-o allow_root,default_permissions",
-                        "-o StrictHostKeyChecking=no,reconnect,ServerAliveInterval=3,ServerAliveCountMax=3," \
-                        f"uid={getuid()},gid={getgid()}",
-                        f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
+    "-o StrictHostKeyChecking=no,reconnect,ServerAliveInterval=3,ServerAliveCountMax=3," \
+    f"uid={getuid()},gid={getgid()}",
+    f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
 
     if not queue:
         print(f"starting sshfs with(started when nothing happens): {str(sshfs_cmd)}")
@@ -151,9 +160,9 @@ def local_mount(c, workstation_dir, server_dir, queue=None):
         print("please give up a host using -H")
         exit(255)
     # TODO: remove mount on exit
-    sshfs_cmd = sshfs[  "-f", "-o", "allow_root,default_permissions,umask=000,StrictHostKeyChecking=no,reconnect," \
-                        f"uid={getuid()},gid={getgid()}",
-                        f"{c.user}@{c.host}:{server_dir}", workstation_dir]
+    sshfs_cmd = sshfs["-f", "-o", "allow_root,default_permissions,umask=000,StrictHostKeyChecking=no,reconnect," \
+                                  f"uid={getuid()},gid={getgid()}",
+    f"{c.user}@{c.host}:{server_dir}", workstation_dir]
 
     if not queue:
         print("running sshfs...")
@@ -163,9 +172,10 @@ def local_mount(c, workstation_dir, server_dir, queue=None):
     local_connection = invoke.context.Context()
     local_connection.run(f"umount {workstation_dir}", hide=True)
 
-#----------------------------------#
-#|             async              |#
-#----------------------------------#
+
+# ----------------------------------#
+# |             async              |#
+# ----------------------------------#
 
 async def async_local_mount(c, workstation_dir, server_dir, event=None):
     """
@@ -176,7 +186,7 @@ async def async_local_mount(c, workstation_dir, server_dir, event=None):
         exit(255)
 
     sshfs_cmd = sshfs["-f", "-o", "allow_root,default_permissions,umask=000,StrictHostKeyChecking=no,reconnect," \
-                        f"uid={getuid()},gid={getgid()}",
+                                  f"uid={getuid()},gid={getgid()}",
     f"{c.user}@{c.host}:{server_dir}", workstation_dir]
 
     if not event:
@@ -192,6 +202,7 @@ async def async_local_mount(c, workstation_dir, server_dir, event=None):
 
     await anyio.sleep(1)
 
+
 async def async_remote_mount(c, workstation_dir, server_dir, event=None):
     """
     async version of remote_mount
@@ -204,9 +215,9 @@ async def async_remote_mount(c, workstation_dir, server_dir, event=None):
     port = get_available_port(c)
     ssh_cmd = ssh["-A", f"-R {port}:127.0.0.1:22", f"{c.user}@{c.host}"]
     sshfs_cmd = ssh_cmd["sshfs", "-f", f"-p {port}", "-o allow_root,default_permissions",
-                        "-o StrictHostKeyChecking=no,reconnect,ServerAliveInterval=3,ServerAliveCountMax=3," \
-                        f"uid={getuid()},gid={getgid()}",
-                        f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
+    "-o StrictHostKeyChecking=no,reconnect,ServerAliveInterval=3,ServerAliveCountMax=3," \
+    f"uid={getuid()},gid={getgid()}",
+    f"{getpass.getuser()}@127.0.0.1:{workstation_dir}", f"{server_dir}"]
 
     if not event:
         print(f"starting sshfs with(started when nothing happens): {str(sshfs_cmd)}")
