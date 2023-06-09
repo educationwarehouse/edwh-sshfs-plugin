@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.3 (2023-06-09)
+### Fix
+* Plumbum sshfs import could still give a sshfs import error. this is due to it for some reason not always giving a commandNotFound ([`0100f8f`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/0100f8fa9ec664f1a07a269e8c89873560dbd139))
+
 ## v0.1.2 (2023-05-31)
 ### Fix
 * **import:** Don't crash the entire edwh tool if sshfs is not installed! ([`03b8365`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/03b836576b36d3c814a9678ad0b98fd12a7e246f))
