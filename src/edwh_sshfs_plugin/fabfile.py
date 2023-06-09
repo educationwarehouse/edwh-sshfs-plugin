@@ -11,7 +11,7 @@ import anyio
 
 try:
     from plumbum.cmd import ssh, sshfs
-except CommandNotFound:
+except (ImportError, CommandNotFound):
     warnings.warn("edwh sshfs plugin is installed but sshfs is missing. "
                   "Please check README.md#installation on how to fix this! "
                   "The commands in this plugin will NOT work unless this is fixed.")
