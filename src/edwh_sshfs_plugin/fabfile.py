@@ -3,10 +3,9 @@ import socket
 import getpass
 import warnings
 
-import invoke
+from invoke import task, context
 from plumbum import BG
 from plumbum.commands.processes import CommandNotFound
-from fabric import task
 
 # import anyio
 import asyncio
@@ -191,7 +190,7 @@ def local_mount(c, workstation_dir, server_dir, queue=None):
 
     sshfs_cmd()
 
-    local_connection = invoke.context.Context()
+    local_connection = context.Context()
     local_connection.run(f"umount {workstation_dir}", hide=True)
 
 
@@ -224,7 +223,7 @@ async def async_local_mount(c, workstation_dir, server_dir, event=None):
 
     process.proc.terminate()
 
-    local_connection = invoke.context.Context()
+    local_connection = context.Context()
     local_connection.run(f"umount {workstation_dir}", warn=True, hide=True)
 
     # await anyio.sleep(1)
