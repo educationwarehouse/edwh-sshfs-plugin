@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.5 (2023-09-19)
+### Performance
+* Slighly sped up import for plugin by using everything from invoke instead of invoke + fabric (fab can still be used!) ([`a931f7a`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/a931f7acdee27905077c2c54ea64626980a11ec7))
+
 ## v0.1.4 (2023-09-19)
 ### Performance
 * Removed anyio import by default because it seems to be unused and slowed down plugin performance ([`864a958`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/864a958daea419f53479014bf8956dabfa678823))
