@@ -67,4 +67,4 @@ edwh -h {server} sshfs.local-mount -w {local_dir} -s {server_dir}
 
 ## License
 
-`edwh-demo-plugin` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`edwh-sshkey-plugin` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
