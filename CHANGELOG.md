@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.4 (2023-09-19)
+### Performance
+* Removed anyio import by default because it seems to be unused and slowed down plugin performance ([`864a958`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/864a958daea419f53479014bf8956dabfa678823))
+
 ## v0.1.3 (2023-06-09)
 ### Fix
 * Plumbum sshfs import could still give a sshfs import error. this is due to it for some reason not always giving a commandNotFound ([`0100f8f`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/0100f8fa9ec664f1a07a269e8c89873560dbd139))
