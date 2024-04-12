@@ -30,6 +30,8 @@ pipx install edwh[plugins,omgeving]
 
 Also you will be required to run these commands
 ```shell
+edwh sshfs.setup
+# OR:
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install openssh-client
