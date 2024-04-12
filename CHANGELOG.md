@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.0 (2024-04-12)
+
+### Feature
+
+* Add `ensure-sshfs` subcommand to make sure sshfs is installed when required + use new `require_sudo` for better sudo prompting ([`3a45117`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/3a451176a7cffaa6af51b052436a34644c79d831))
+
 ## v0.1.5 (2023-09-19)
 ### Performance
 * Slighly sped up import for plugin by using everything from invoke instead of invoke + fabric (fab can still be used!) ([`a931f7a`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/a931f7acdee27905077c2c54ea64626980a11ec7))
