@@ -23,12 +23,15 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ['fabric', "plumbum>=1.8.1"]
+dependencies = [
+    "edwh",
+    "plumbum>=1.8.1",
+]
 
 [project.optional-dependencies]
 dev = [
     "hatch",
-    # "python-semantic-release",
+    "python-semantic-release<8",
     "black",
     "pytest",
 ]
