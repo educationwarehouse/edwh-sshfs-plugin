@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = 'sshfs project with a plugin to be discovered from the edwh package'
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license-expression = "MIT"
 keywords = []
 authors = [
     { name = "Remco Boerma", email = "remco.b@educationwarehouse.nl" },
