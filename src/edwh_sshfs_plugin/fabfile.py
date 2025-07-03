@@ -4,7 +4,8 @@ import os
 import socket
 
 import edwh.tasks
-from invoke import Context, context, task
+from edwh import task
+from invoke import Context, context
 from plumbum import BG, local
 
 
@@ -93,7 +94,7 @@ def ensure_sshfs(c: Context):
         setup(c)
 
 
-@task(help={'folder': "The directory path to be unmounted."}, pre=[ensure_sshfs])
+@task(help={"folder": "The directory path to be unmounted."}, pre=[ensure_sshfs])
 def unmount_dir(c, folder):
     """
     Unmounts a directory on the server.
@@ -107,17 +108,17 @@ def unmount_dir(c, folder):
     if not c.run(umount_server_dir, warn=True).ok:
         print("cannot unmount because following processes are still running and using the mount")
         c.run(f"lsof -n {folder} 2>/dev/null")
-        pids = c.run("lsof -t -n /home/ubuntu/testing 2>/dev/null", hide=True).stdout.strip().split('\n')
-        print(f'Terminate with: kill {" ".join(pids)}; sleep 2; umount {folder}')
+        pids = c.run("lsof -t -n /home/ubuntu/testing 2>/dev/null", hide=True).stdout.strip().split("\n")
+        print(f"Terminate with: kill {' '.join(pids)}; sleep 2; umount {folder}")
     else:
         print("suFccessfully exited :)")
 
 
 @task(
     help={
-        'workstation-dir': "The directory path on the local machine to mount the server directory.",
-        'server-dir': "The directory path on the remote server to be mounted.",
-        'queue': "An optional queue object used for synchronization. Defaults to None, optional",
+        "workstation-dir": "The directory path on the local machine to mount the server directory.",
+        "server-dir": "The directory path on the remote server to be mounted.",
+        "queue": "An optional queue object used for synchronization. Defaults to None, optional",
     },
     pre=[ensure_sshfs],
 )
@@ -141,7 +142,7 @@ def remote_mount(
 
     # get an available port that is usable on local and remote so we can setup a connection with the ports
     port = get_available_port(c)
-    ssh_cmd = local['ssh']["-A", f"-R {port}:127.0.0.1:22", f"{c.user}@{c.host}"]
+    ssh_cmd = local["ssh"]["-A", f"-R {port}:127.0.0.1:22", f"{c.user}@{c.host}"]
     sshfs_cmd = ssh_cmd[
         "sshfs",
         "-f",
@@ -163,9 +164,9 @@ def remote_mount(
 
 @task(
     help={
-        'workstation-dir': 'The directory path on the local machine to be mounted.',
-        'server-dir': 'The directory path on the remote server to mount the workstation directory.',
-        'queue': 'An optional queue object used for synchronization. Defaults to None, optional',
+        "workstation-dir": "The directory path on the local machine to be mounted.",
+        "server-dir": "The directory path on the remote server to mount the workstation directory.",
+        "queue": "An optional queue object used for synchronization. Defaults to None, optional",
     },
     pre=[ensure_sshfs],
 )
@@ -184,7 +185,7 @@ def local_mount(c, workstation_dir, server_dir, queue=None):
         exit(255)
 
     # TODO: remove mount on exit
-    sshfs_cmd = local['sshfs'][
+    sshfs_cmd = local["sshfs"][
         "-f",
         "-o",
         "allow_root,default_permissions,umask=000,StrictHostKeyChecking=no,reconnect,"
@@ -215,7 +216,7 @@ async def async_local_mount(c, workstation_dir, server_dir, event=None):
         print("please provide a host using -H")
         exit(255)
 
-    sshfs_cmd = local['sshfs'][
+    sshfs_cmd = local["sshfs"][
         "-f",
         "-o",
         "allow_root,default_permissions,umask=000,StrictHostKeyChecking=no,reconnect,"
@@ -249,7 +250,7 @@ async def async_remote_mount(c, workstation_dir, server_dir, event=None):
 
     # get an available port that is usable on local and remote so we can setup a connection with the ports
     port = get_available_port(c)
-    ssh_cmd = local['ssh']["-A", f"-R {port}:127.0.0.1:22", f"{c.user}@{c.host}"]
+    ssh_cmd = local["ssh"]["-A", f"-R {port}:127.0.0.1:22", f"{c.user}@{c.host}"]
     sshfs_cmd = ssh_cmd[
         "sshfs",
         "-f",
