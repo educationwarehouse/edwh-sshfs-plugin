@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.1 (2025-07-03)
+
+### Fix
+
+* Use `edwh.task` instead of `invoke.task` ([`0e48c89`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/0e48c89bf82d180d2adc9a276acc773dea20aa4b))
+
+### Documentation
+
+* **readme:** Included `edwh sshfs.setup` as shortcut for the old manual bash commands ([`bbf68fa`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/bbf68fac73f4f7b0f0c22aa003d8e208e7533e77))
+
 ## v0.2.0 (2024-04-12)
 
 ### Feature
