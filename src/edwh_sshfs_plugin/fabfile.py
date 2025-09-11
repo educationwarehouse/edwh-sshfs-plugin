@@ -73,7 +73,7 @@ def get_local_available_port(start_port: int = 2222):
     return available_ports
 
 
-@task()
+@task(hookable=False)
 def setup(c: Context):
     """
     Installs the necessary packages for SSHFS.
