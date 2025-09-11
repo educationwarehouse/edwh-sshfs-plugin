@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.2 (2025-09-11)
+
+### Fix
+
+* Sshfs setup should not run automatically when doing `edwh setup` ([`b6d2326`](https://github.com/educationwarehouse/edwh-sshfs-plugin/commit/b6d2326d39a9f36ef67b4c910c5219673d4d7b63))
+
 ## v0.2.1 (2025-07-03)
 
 ### Fix
